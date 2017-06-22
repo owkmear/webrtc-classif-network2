@@ -254,12 +254,12 @@ class Classificator {
         categoryPoints.forEach(function(item){
             console.log(item.name + ' = ' + (item.points.toFixed(1)) + ' очков');
         });
-        console.log('Размер = ' + categoryPoints.length);
+        //console.log('Размер = ' + categoryPoints.length);
         
         //console.log(words);
-        /*words.forEach(function(item) {
-            console.log(item.name + ' ' + item.count);
-        });*/
+        words.forEach(function(item) {
+            console.log('Найдено: ' + item.name + ' - ' + item.count);
+        });
 
         if (TRAINING_MODE_2) {
             if (maxMatCat === null)

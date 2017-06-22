@@ -5,7 +5,7 @@ var COLOR_DEBUG = "blue";
 var COLOR_EXCEPTION = "red";
 var RESPONSE_TIME = 1000; // Время на ожидание ответа о классификации от пиров
 var TRAINING_MODE = true; // Режим обучения, при котором пользователю предлагается задать классификацию вручную
-var TRAINING_MODE_2 = true; // Режим обучения, при котором определенная классификация добавляется в БД
+var TRAINING_MODE_2 = false; // Режим обучения, при котором определенная классификация добавляется в БД
 var HOSTNAME = window.location.hostname;
 //var ROOT = 'http://localhost:3001';
 var ROOT = 'https://signallingserverfe4e8e9b6b.herokuapp.com';
@@ -268,12 +268,12 @@ class Classificator {
         categoryPoints.forEach(function(item){
             console.log(item.name + ' = ' + (item.points.toFixed(1)) + ' очков');
         });
-        console.log('Размер = ' + categoryPoints.length);
+        //console.log('Размер = ' + categoryPoints.length);
         
         //console.log(words);
-        /*words.forEach(function(item) {
-            console.log(item.name + ' ' + item.count);
-        });*/
+        words.forEach(function(item) {
+            console.log('Найдено: ' + item.name + ' - ' + item.count);
+        });
 
         if (TRAINING_MODE_2) {
             if (maxMatCat === null)
@@ -439,7 +439,6 @@ class Classificator {
         }
     }
 }
-
 
 // Events.js
 class EventEmitter {
