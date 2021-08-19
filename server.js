@@ -1,18 +1,18 @@
-var MAX_ROOM_USERS = 200
-var DEBUG_MODE = true
+const MAX_ROOM_USERS = 200
+const DEBUG_MODE = true
 
-var static = require('node-static')
-var http = require('http')
-var file = new static.Server()
-var app = http.createServer(function (req, res) {
+const static = require('node-static')
+const http = require('http')
+const file = new static.Server()
+const app = http.createServer(function (req, res) {
     file.serve(req, res)
 })
-port = Number(process.env.PORT || 3000)
+const port = Number(process.env.PORT || 3000)
 app.listen(port)
 
-var io = require('socket.io').listen(app)
+const io = require('socket.io').listen(app)
 
-var colors = require('colors/safe')
+const colors = require('colors/safe')
 colors.setTheme({
     silly: 'rainbow',
     input: 'grey',
@@ -26,32 +26,20 @@ colors.setTheme({
     error: 'red'
 })
 
-var rooms = {}
-var lastUserId = 0
-var lastRoomId = 0
+const rooms = {}
+let lastUserId = 0
+let lastRoomId = 0
 
-var MessageType = {
-    // A messages you send to server, when want to join or leave etc.
+const MessageType = {
     JOIN: 'join',
     DISCONNECT: 'disconnect',
-
-    // NSC
     SERVER_MESSAGE: 'server_message',
-
-    // You receive room info as a response for join command. It contains information about
-    // the room you joined, and it's users
     ROOM: 'room',
-
-    // A messages you receive from server when another user want to join or leave etc.
     USER_JOIN: 'user_join',
     USER_READY: 'user_ready',
     USER_LEAVE: 'user_leave',
-
-    // WebRtc signalling info, session and ice-framework related
     SDP: 'sdp',
     ICE_CANDIDATE: 'ice_candidate',
-
-    // Errors... shit happens
     ERROR_ROOM_IS_FULL: 'error_room_is_full',
     ERROR_USER_INITIALIZED: 'error_user_initialized'
 }
@@ -114,13 +102,10 @@ Room.prototype = {
     }
 }
 
-// socket
 function handleSocket(socket) {
-    //log('constructor has been called', 'input');
-    var user = null // TODO: почему юзер не присваивается в onJoin?
-    var room = null
+    let user = null
+    let room = null
 
-    // NSC
     socket.on(MessageType.SERVER_MESSAGE, onServerMessage)
 
     socket.on(MessageType.JOIN, onJoin)
@@ -128,59 +113,39 @@ function handleSocket(socket) {
     socket.on(MessageType.ICE_CANDIDATE, onIceCandidate)
     socket.on(MessageType.DISCONNECT, onLeave)
 
-    // NSC
     function onServerMessage(message) {
         console.log('Message from peer: ' + message.candidate)
     }
 
     function onJoin(joinData) {
         log('IP: ' + socket.conn.remoteAddress, 'input')
-        //debugger;
-        // Somehow sent join request twice?
+
         if (user !== null || room !== null) {
             room.sendTo(user, MessageType.ERROR_USER_INITIALIZED)
             return
         }
 
-        // Let's get a room, or create if none still exists
         room = getOrCreateRoom(joinData.roomName)
 
-        // TODO: корректная обработка максимального размера комнат
-        // TODO: потестировать вывод сообщения о размере комнаты
-        // TODO: Выдает ошибку при превышении лимита: "Cannot read property 'getId' of undefined". Взять обработку из shooter
         if (room.numUsers() >= MAX_ROOM_USERS) {
             room.sendTo(user, MessageType.ERROR_ROOM_IS_FULL)
             return
         }
 
-        // Add a new user
         room.addUser((user = new User()), socket)
 
-        // Send room info to new user
         room.sendTo(user, MessageType.ROOM, {
             userId: user.getId(),
             roomName: room.getName(),
             users: room.getUsers()
         })
 
-        // Notify others of a new user joined
         room.broadcastFrom(user, MessageType.USER_JOIN, {
             userId: user.getId(),
             users: room.getUsers()
         })
 
-        /////////////////////////////////////////////////////
-
-        // Notify others of a new user ready
-        /*room.broadcastFrom(user, MessageType.USER_READY, {
-                userId: user.getId(),
-                users: room.getUsers()
-            });*/
-
-        /////////////////////////////////////////////////////
-
         log('onJoin ' + user.getId(), 'warn')
-        //console.log('User %s joined room %s. Users in room: %d',
         console.log(
             'Пользователь %s вошел в комнату %s. Всего в комнате: %d',
             user.getId(),
@@ -191,6 +156,7 @@ function handleSocket(socket) {
     function destroy() {
         log('Destructor is called')
     }
+
     function getOrCreateRoom(name) {
         var room
         if (!name) {
@@ -204,8 +170,6 @@ function handleSocket(socket) {
     }
 
     function onLeave() {
-        //log('onLeave', 'warn');
-        //log(user, 'warn');
         if (user === null) log('onLeave неизвестный юзер', 'warn')
         else log('onLeave ' + user.getId(), 'warn')
         if (room === null) {
@@ -229,16 +193,13 @@ function handleSocket(socket) {
 
     function onSdp(message) {
         log('onSdp ' + user.getId() + '(' + message.userId + ')', 'warn')
-        //console.log(socket);
         try {
-            //console.log('type = ' + message.sdp.type);
             room.sendToId(message.userId, MessageType.SDP, {
                 userId: user.getId(),
                 sdp: message.sdp
             })
         } catch (e) {
             log('Ошибка: onSdp ' + user.getId() + '(' + message.userId + ')', 'error')
-            //debugger;
         }
     }
 
@@ -251,8 +212,6 @@ function handleSocket(socket) {
             })
         } catch (e) {
             log('Ошибка: onIceCandidate ' + user.getId() + '(' + message.userId + ')', 'error')
-            // TODO: Пользователь message.userId отключился и user.getId() выдает исключение
-            // TODO: Нужно избавиться от следов message.userId
             room.removeUser(message.userId)
             room.broadcastFrom(user, MessageType.USER_LEAVE, {
                 userId: message.userId
@@ -262,30 +221,16 @@ function handleSocket(socket) {
 }
 
 io.on('connection', handleSocket)
-/*io.on('error', function() {
-    console.log("Error occurred!");
-});*/
 console.log('Сервер запущен на порте: %d', port)
 
-// Управление консолью на сервере
 var stdin = process.openStdin()
 stdin.addListener('data', function (d) {
-    //console.log("you entered: [" + d.toString().trim() + "]");
-    //console.log(d.toString().trim());
-    //console.log(colors.warn(lastUserId));
-    var command = ''
+    let command = ''
     var data = d.toString().trim()
-    for (var i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
         if (!(data[i] === ' ' && data[i + 1] === ' ')) command += data[i]
     }
-    var com = command.split(' ')
-    //console.log(com[0]);
-    //return;
-    //console.log('[' + command + ']');
-    //return;
-    //var command = d.toString().trim().split(' ');
-    //console.log(command);
-    //return;
+    const com = command.split(' ')
     switch (com[0]) {
         case 'peers':
             var _users = rooms['1'].getUsers()
