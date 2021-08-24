@@ -36,12 +36,6 @@ class Classificator {
         return localStorage.getItem(key)
     }
 
-    /*var store = new Storage();
-    store.set("nature.ru", "природа");
-    store.set("auto.ru", "автомобили");
-    store.set("news.ru", "новости");
-    store.set("127.0.0.1", "цирк");*/
-
     loadKeyWordDatabaseLocal(database) {
         this.keyWordDatabase = database
     }
@@ -371,7 +365,6 @@ class Classificator {
         var exist = -1
         var count = 0
         this.keyWordDatabase.forEach(function (item) {
-            // суд
             if (item.name === catName) exist = count
             count++
         })
@@ -379,37 +372,19 @@ class Classificator {
         words.forEach(function (item) {
             if (item.count > max) max = item.count
         })
-        /*for (key in words) {
-            if (words[key].name === cat)
-                exist = key;
-        }*/
-        //console.log('exist = ' + exist);
         if (exist !== -1) {
-            //console.log('Категория ' + cat + ' уже есть, сливаем данные');
-
-            //console.log(this.keyWordDatabase[exist].dic);
-            //return;
             words.forEach(function (item1) {
-                // заключен 8
                 var existWord = -1
                 var count = 0
-                //console.log(db);
-                //for (key in this.keyWordDatabase[exist].dic) {
-                //console.log(key);
-                //}
                 db[exist].dic.forEach(function (item2) {
-                    // name: "присяжн", weight: 0.4
                     if (item1.name === item2.name) existWord = count
                     count++
                 })
-                //console.log('existWord = ' + existWord);
                 if (existWord !== -1) {
-                    //console.log('Сливаем ' + item1.name);
                     db[exist].dic[existWord].weight = Number(
                         ((db[exist].dic[existWord].weight + item1.count / max) / 2).toFixed(1)
                     )
                 } else {
-                    //console.log('Добавляем ' + item1.name);
                     var newItem = {}
                     newItem.name = item1.name
                     newItem.weight = Number((item1.count / max).toFixed(1))
@@ -422,7 +397,6 @@ class Classificator {
             var cat = {}
             cat.name = catName
             cat.dic = []
-            //console.log(words)
             words.forEach(function (item) {
                 var newItem = {}
                 newItem.name = item.name
@@ -440,7 +414,6 @@ class EventEmitter {
         debugLog('Object Events created')
 
         this.lastToken = 0
-        //this.subscribers = null;
         this.subscribers = {}
     }
 
@@ -549,8 +522,6 @@ class PeerConnection extends Events.Emitter {
         this.pendingCandidates = null
         this.lastMessageOrd = null
 
-        // Сам конструктор
-        //window.peer = this;
         debugLog('Object PeerConnection created')
 
         this.socket = socket
@@ -571,8 +542,6 @@ class PeerConnection extends Events.Emitter {
     }
 
     destroy() {
-        // TODO: вызвать метод родителя
-        //this.parent();
         this.subscribers = null
 
         this.closePeerConnection()
@@ -697,22 +666,8 @@ class PeerConnection extends Events.Emitter {
         })
     }
 
-    // NSC
-    /*sendData: function(data) {
-        console.log('call sendData()');
-        //sendChannel.send(data);
-        this.dataChannel.send(data);
-        //console.log('Sent Data: ' + data);
-    },*/
-
     // Data channel
     sendMessage(message) {
-        /*if (!this.dataChannelReady) {
-            exceptionLog('Data channel is not ready');
-            return;
-        }*/
-
-        // TODO: ловить эксепшион bag_1
         this.dataChannel.send(message)
     }
 
@@ -725,7 +680,6 @@ class PeerConnection extends Events.Emitter {
     // Слушает входящие сообщения от пиров
     onDataChannelMessage(event) {
         var obj = JSON.parse(event.data)
-        //var stor = new Storage();
         if (obj.type === 'сlassifReq') {
             var classification = store.get(obj.site)
 
@@ -740,13 +694,6 @@ class PeerConnection extends Events.Emitter {
             var json = JSON.stringify(answer)
             room.peers[obj.peerId].sendMessage(json)
         } else if (obj.type === 'setClassif') {
-            //var classification = stor.set(obj.site);
-
-            // Отправляем на запросивший пир ответ
-            /*var answer = {};
-            answer.type = "answer";
-            answer.site = obj.site;
-            answer.classification = classification;*/
             debugLog('получен запрос на установку классификации сайта')
         }
 
@@ -777,7 +724,6 @@ class PeerConnection extends Events.Emitter {
                 debugLog('Сайт уже классифицирован другим пиром')
             }
         } else exceptionLog('Получен неверный формат сообщения от других пиров')
-        //this.emit('message', MessageBuilder.deserialize(event.data));
     }
 
     onDataChannelClose() {
@@ -1092,45 +1038,6 @@ class RoomConnection extends Events.Emitter {
             answersFromPeers.forEach(function (item) {
                 debugLog('classification = ' + item.classification + ' site = ' + item.site)
             })
-
-            //////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////
-
-            /*var item = {};
-            item.classification = 'погода';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);
-
-            var item = {};
-            item.classification = 'погода';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);
-
-            var item = {};
-            item.classification = 'погода';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);
-
-            var item = {};
-            item.classification = 'гадание';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);
-
-            var item = {};
-            item.classification = 'null';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);
-
-            var item = {};
-            item.classification = 'null';
-            item.site = 'wether.ru';
-            answersFromPeers.push(item);*/
-
-            /*answersFromPeers.forEach(function(item){
-                console.log(item.site);
-            });*/
-
             // Создаем словарь частоты
             var frequency = []
             var count = 0
@@ -1188,22 +1095,7 @@ class RoomConnection extends Events.Emitter {
             this.peers[p].sendMessage(json)
             this.peerAnswers++
         }
-
-        /*var category = getCategory();
-        if (category !== null)
-            console.log("Категория: " + category);
-        else
-            console.log("Категория не определена");*/
     }
-
-    // NSC
-    /*myLoadStorage() {
-        //var store = new Storage();
-        store.set("nature.ru", "природа");
-        store.set("auto.ru", "автомобили");
-        store.set("news.ru", "новости");
-        store.set("127.0.0.1", "нет классификации");
-    }*/
 }
 
 // Application.js
@@ -1233,87 +1125,6 @@ class GameRoom {
 function test() {
     window.c = new Classificator()
 
-    // TODO: загрузка со стороннего ресурса
-    /*var keyWordDatabase = [];
-    var cat = {};
-    cat.name = "суд";
-    cat.dic = ["присяжн", "суд", "обвиня", "заключен", "приговор"];
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "природа";
-    cat.dic = ["дерев", "лес", "птицы", "животн", "растен"];
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "компьютеры";
-    cat.dic = ["памят", "процессор", "клавиатур", "мышь", "монитор"];
-    keyWordDatabase.push(cat);
-    c.loadKeyWordDatabase(keyWordDatabase);*/
-
-    /*var keyWordDatabase = [];
-
-    var cat = {};
-    cat.name = "суд";
-    cat.dic = [];
-    var item = {}; item.name = "присяжн"; item.weight = 0.4; cat.dic.push(item);
-    var item = {}; item.name = "суд"; item.weight = 0.8; cat.dic.push(item);
-    var item = {}; item.name = "обвиня"; item.weight = 0.7; cat.dic.push(item);
-    var item = {}; item.name = "заключен"; item.weight = 0.3; cat.dic.push(item);
-    var item = {}; item.name = "приговорен"; item.weight = 0.7; cat.dic.push(item);
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "природа";
-    cat.dic = [];
-    var item = {}; item.name = "дерев"; item.weight = 0.1; cat.dic.push(item);
-    var item = {}; item.name = "лесн"; item.weight = 0.3; cat.dic.push(item);
-    var item = {}; item.name = "птиц"; item.weight = 0.6; cat.dic.push(item);
-    var item = {}; item.name = "животн"; item.weight = 0.5; cat.dic.push(item);
-    var item = {}; item.name = "растен"; item.weight = 0.7; cat.dic.push(item);
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "компьютеры";
-    cat.dic = [];
-    var item = {}; item.name = "памят"; item.weight = 0.9; cat.dic.push(item);
-    var item = {}; item.name = "процессорн"; item.weight = 0.8; cat.dic.push(item);
-    var item = {}; item.name = "клавиатур"; item.weight = 0.4; cat.dic.push(item);
-    var item = {}; item.name = "мыш"; item.weight = 0.5; cat.dic.push(item);
-    var item = {}; item.name = "монитор"; item.weight = 0.6; cat.dic.push(item);
-    keyWordDatabase.push(cat);*/
-
-    /*var cat = {};
-    cat.name = "суд";
-    cat.dic = [];
-    cat.dic.push({"присяжн": 0.4});
-    cat.dic.push({"суд": 0.8});
-    cat.dic.push({"обвиня": 0.7});
-    cat.dic.push({"заключен": 0.3});
-    cat.dic.push({"приговор": 0.5});
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "природа";
-    cat.dic = [];
-    cat.dic.push({"дерев": 0.1});
-    cat.dic.push({"лес": 0.3});
-    cat.dic.push({"птицы": 0.6});
-    cat.dic.push({"животн": 0.5});
-    cat.dic.push({"растен": 0.7});
-    keyWordDatabase.push(cat);
-
-    var cat = {};
-    cat.name = "компьютеры";
-    cat.dic = [];
-    cat.dic.push({"памят": 0.9});
-    cat.dic.push({"процессор": 0.3});
-    cat.dic.push({"клавиатур": 0.6});
-    cat.dic.push({"мышь": 0.4});
-    cat.dic.push({"монитор": 0.7});
-    keyWordDatabase.push(cat);*/
-
-    //c.loadKeyWordDatabase(keyWordDatabase);
     c.loadKeyWordDatabase()
 
     c.loadWordsWithoutSubject()

@@ -1,19 +1,16 @@
 describe('classificator.js', function () {
     before(function () {
-        var DEBUG_MODE = true
-        var COLOR_DEBUG = 'blue'
-        var COLOR_EXCEPTION = 'red'
-        var RESPONSE_TIME = 1000 // Время на ожидание ответа о классификации от пиров
-        var TRAINING_MODE = true // Режим обучения, при котором пользователю предлагается задать классификацию вручную
-        var HOSTNAME = window.location.hostname
+        const DEBUG_MODE = true
+        const COLOR_DEBUG = 'blue'
+        const COLOR_EXCEPTION = 'red'
+        const RESPONSE_TIME = 1000 // Время на ожидание ответа о классификации от пиров
+        const TRAINING_MODE = true // Режим обучения, при котором пользователю предлагается задать классификацию вручную
+        const HOSTNAME = window.location.hostname
 
-        TRAINING_MODE_2 = false // Режим обучения, при котором определенная классификация добавляется в БД
         //var ROOT = 'http://localhost:3001';
-        ROOT = 'https://signallingserverfe4e8e9b6b.herokuapp.com'
+        const ROOT = 'https://signallingserverfe4e8e9b6b.herokuapp.com'
 
-        console.log('Инициация класса')
-        classificator = new Classificator()
-        //classificator.loadKeyWordDatabase();
+        const classificator = new Classificator()
         classificator.loadWordsWithoutSubject()
 
         var keyWordDatabase = []
